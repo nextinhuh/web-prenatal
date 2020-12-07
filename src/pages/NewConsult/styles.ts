@@ -47,6 +47,16 @@ export const Menu = styled.div`
     margin-top: 25px;
     margin-bottom: 25px;
   }
+
+  input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    color: #76348d;
+    &::placeholder {
+      color: #76348d;
+    }
+  }
 `;
 
 export const FieldSet = styled.fieldset`
@@ -110,4 +120,15 @@ export const MenuContent = styled.div`
   grid-template-rows: 250px 250px;
   grid-gap: 40px;
   margin-top: 50px;
+`;
+
+export const ErrorText = styled.p`
+  font-size: 20px;
+  text-align: right;
+  color: red;
+  margin: 5px 0;
+`;
+
+export const InputText = styled.input`
+  background: papayawhip;
 `;

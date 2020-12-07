@@ -32,3 +32,14 @@ export const Content = styled.div`
     color: #76348d;
   }
 `;
+
+export const ErrorText = styled.p`
+  font-size: 20px;
+  text-align: right;
+  color: red;
+  margin: 5px 0;
+`;
+
+export const InputText = styled.input`
+  background: papayawhip;
+`;

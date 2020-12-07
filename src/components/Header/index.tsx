@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { IoIosLogOut } from 'react-icons/io';
+import firebase from 'firebase';
+import 'firebase/firestore';
 
 import { Container, LogoContent, UserAvatar } from './style';
 import logoImg from '../../assets/logo.png';
 
+interface User {
+  name: string | undefined | null;
+  photoUrl: string | undefined | null;
+}
+
 const Header: React.FC = () => {
+  const [userInfo, setUserInfo] = useState<User>({} as User);
+
+  useEffect(() => {
+    const user = {
+      name: firebase.auth().currentUser?.displayName,
+      photoUrl: firebase.auth().currentUser?.photoURL,
+    };
+    setUserInfo(user);
+  }, []);
+
   return (
     <Container>
       <LogoContent>
@@ -13,12 +30,12 @@ const Header: React.FC = () => {
       </LogoContent>
 
       <UserAvatar>
-        <img
-          src="https://avatars0.githubusercontent.com/u/50875570?s=460&u=fe14fc8cb776233600522328f1ea1406f895f44a&v=4"
-          alt=""
-        />
+        <img src={userInfo.photoUrl ? userInfo.photoUrl : ''} alt="" />
 
-        <p>Olá, Nome do usuário</p>
+        <p>
+          Olá,
+          {` ${userInfo.name}`}
+        </p>
       </UserAvatar>
 
       <IoIosLogOut size={35} color="#503d77" />

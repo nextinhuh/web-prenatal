@@ -1,9 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import { FaLaptopMedical, FaFileSignature, FaPlus } from 'react-icons/fa';
-import { Formik } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import * as Yup from 'yup';
+import firebase from 'firebase';
+import 'firebase/firestore';
 
+import MaskedInput from 'react-text-mask';
 import {
   Container,
   MenuContent,
@@ -12,25 +16,86 @@ import {
   SecondButton,
   TextArea,
   FieldSet,
+  ErrorText,
+  InputText,
 } from './styles';
 
 import Header from '../../components/Header';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
+import InputMasked from '../../components/InputMasked';
+
+interface MedicalRecords {
+  abdominalCircumference: string;
+  bloodPressure: string;
+  heartRate: string;
+  heigh: string;
+  weight: string;
+}
 
 const NewConsult: React.FC = () => {
   const [prescription, setPrescription] = useState([{ test: 0 }]);
   const [value, setValue] = React.useState(2);
   const [tabIndex, setTabIndex] = useState(0);
+  const firebaseAuth = firebase.auth().currentUser;
+  const firebaseFirestore = firebase.firestore();
 
   const handleRemovePrescription = useCallback(() => {
-    const removeIten = prescription.pop();
+    prescription.pop();
     setPrescription([...prescription]);
   }, [prescription]);
 
   const handleAddNewPrescription = useCallback(() => {
     setPrescription([...prescription, { test: 1 }]);
   }, [prescription]);
+
+  const handleMoveToPrescriptionTab = useCallback(
+    async (formValues: MedicalRecords) => {
+      const time = new Date().getTime();
+      console.log('entrou');
+      await firebaseFirestore
+        .collection('users')
+        .doc(firebaseAuth?.uid)
+        .collection('consults')
+        .doc(time.toString())
+        .set({
+          prescriptions: {
+            bloodPressure: formValues.bloodPressure,
+            heartRate: formValues.heartRate,
+            weight: formValues.weight,
+            heigh: formValues.heigh,
+            abdominalCircumference: formValues.abdominalCircumference,
+          },
+          medicalRecords: [
+            {
+              title: 'Test',
+              description:
+                'Fazer repouso com duração de 2 horas, a cada 5 horas.',
+            },
+            {
+              title: 'Test',
+              description: ' Dieta balanceada, comer comidas leves.',
+            },
+            {
+              title: 'Test',
+              description: 'Exercitar os membros inferiores com regularidade.',
+            },
+            {
+              title: 'Teste',
+              description:
+                'Testando o teste Testando o teste Testando o teste Testando o teste.',
+            },
+          ],
+        })
+        .then(() => {
+          setTabIndex(1);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    [firebaseAuth, firebaseFirestore],
+  );
 
   return (
     <Container>
@@ -46,41 +111,161 @@ const NewConsult: React.FC = () => {
             <Menu>
               <Formik
                 initialValues={{
-                  firstName: '',
+                  abdominalCircumference: '',
+                  bloodPressure: '',
+                  heartRate: '',
+                  heigh: '',
+                  weight: '',
                 }}
+                validationSchema={Yup.object({
+                  abdominalCircumference: Yup.string().required(
+                    'Este campo deve ser preenchido!',
+                  ),
+                  bloodPressure: Yup.string().required(
+                    'Este campo deve ser preenchido!',
+                  ),
+                  heartRate: Yup.string().required(
+                    'Este campo deve ser preenchido!',
+                  ),
+                  heigh: Yup.string().required(
+                    'Este campo deve ser preenchido!',
+                  ),
+                  weight: Yup.string().required(
+                    'Este campo deve ser preenchido!',
+                  ),
+                })}
                 onSubmit={() => {}}
               >
-                <form action="#">
-                  <FieldSet>
-                    <h1>Prontuário</h1>
+                {({
+                  values,
+                  handleChange,
+                  handleSubmit,
+                  errors,
+                  isSubmitting,
+                  handleBlur,
+                  touched,
+                  setFieldValue,
+                }) => (
+                  <Form>
+                    <FieldSet>
+                      <h1>Prontuário</h1>
 
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      placeholder="Circunferência abdominal"
-                    />
-                    <Input type="text" placeholder="Pressão sanguínea" />
-                    <Input type="text" placeholder="Frequência cardíaca" />
-                    <Input type="text" placeholder="Altura" />
-                    <Input type="text" placeholder="Peso" />
+                      <InputMasked
+                        mask={[/[0-9]/, /\d/, /\d/, ' Cm']}
+                        value={values.abdominalCircumference}
+                        onChange={e =>
+                          setFieldValue(
+                            'abdominalCircumference',
+                            e.target.value,
+                            // eslint-disable-next-line prettier/prettier
+                          )}
+                        onBlur={handleBlur('abdominalCircumference')}
+                        name="abdominalCircumference"
+                        id="abdominalCircumference"
+                        placeholder="Circunferência abdominal"
+                      />
 
-                    <Button type="submit" onClick={() => setTabIndex(1)}>
-                      Avançar
-                    </Button>
-                  </FieldSet>
-                </form>
+                      {touched.abdominalCircumference &&
+                        errors.abdominalCircumference && (
+                          <ErrorText>{errors.abdominalCircumference}</ErrorText>
+                        )}
+
+                      <InputMasked
+                        mask={[
+                          /[0-9]/,
+                          /\d/,
+                          /\d/,
+                          ' ',
+                          'x',
+                          ' ',
+                          /\d/,
+                          /\d/,
+                          ' mmHg',
+                        ]}
+                        value={values.bloodPressure}
+                        onChange={e =>
+                          setFieldValue(
+                            'bloodPressure',
+                            e.target.value,
+                            // eslint-disable-next-line prettier/prettier
+                          )}
+                        onBlur={handleBlur('bloodPressure')}
+                        name="bloodPressure"
+                        placeholder="Pressão arterial"
+                      />
+                      {touched.bloodPressure && errors.bloodPressure && (
+                        <ErrorText>{errors.bloodPressure}</ErrorText>
+                      )}
+                      <InputMasked
+                        mask={[/[0-9]/, /\d/, /\d/, ' ipm']}
+                        value={values.heartRate}
+                        onChange={e =>
+                          setFieldValue(
+                            'heartRate',
+                            e.target.value,
+                            // eslint-disable-next-line prettier/prettier
+                          )}
+                        onBlur={handleBlur('heartRate')}
+                        name="heartRate"
+                        placeholder="Frequência cardíaca"
+                      />
+                      {touched.heartRate && errors.heartRate && (
+                        <ErrorText>{errors.heartRate}</ErrorText>
+                      )}
+                      <InputMasked
+                        mask={[/[0-9]/, ',', ' ', /\d/, /\d/, ' Mts']}
+                        value={values.heigh}
+                        onChange={e =>
+                          setFieldValue(
+                            'heigh',
+                            e.target.value,
+                            // eslint-disable-next-line prettier/prettier
+                          )}
+                        onBlur={handleBlur('heigh')}
+                        name="heigh"
+                        placeholder="Altura"
+                      />
+                      {touched.heigh && errors.heigh && (
+                        <ErrorText>{errors.heigh}</ErrorText>
+                      )}
+                      <InputMasked
+                        mask={[
+                          /[0-9]/,
+                          /[0-9]/,
+                          /[0-9]/,
+                          ',',
+                          ' ',
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          ' Kg',
+                        ]}
+                        value={values.weight}
+                        onChange={e =>
+                          setFieldValue(
+                            'weight',
+                            e.target.value,
+                            // eslint-disable-next-line prettier/prettier
+                          )}
+                        onBlur={handleBlur('weight')}
+                        name="weight"
+                        placeholder="Peso"
+                      />
+                      {touched.weight && errors.weight && (
+                        <ErrorText>{errors.weight}</ErrorText>
+                      )}
+
+                      <Button type="submit">Avançar</Button>
+                    </FieldSet>
+                  </Form>
+                )}
               </Formik>
             </Menu>
           </TabPanel>
           <TabPanel>
             <Menu>
-              <Formik
-                initialValues={{
-                  firstName: '',
-                }}
-                onSubmit={() => {}}
-              >
-                <form action="#">
+              <Formik initialValues={{}} onSubmit={() => {}}>
+                <Form>
                   <FieldSet>
                     <h1>Prescrição</h1>
 
@@ -110,9 +295,9 @@ const NewConsult: React.FC = () => {
                       );
                     })}
 
-                    <Button type="button">Registrar consulta</Button>
+                    <Button type="submit">Registrar consulta</Button>
                   </FieldSet>
-                </form>
+                </Form>
               </Formik>
             </Menu>
           </TabPanel>
