@@ -1,23 +1,20 @@
 import React, { useCallback, useState } from 'react';
-import { FaLaptopMedical, FaFileSignature, FaPlus } from 'react-icons/fa';
-import { Formik, Form, Field } from 'formik';
+import { FaPlus } from 'react-icons/fa';
+import { Formik, Form } from 'formik';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import * as Yup from 'yup';
 import firebase from 'firebase';
 import 'firebase/firestore';
 
-import MaskedInput from 'react-text-mask';
 import {
   Container,
-  MenuContent,
   Content,
   Menu,
   SecondButton,
   TextArea,
   FieldSet,
   ErrorText,
-  InputText,
 } from './styles';
 
 import Header from '../../components/Header';
@@ -33,26 +30,31 @@ interface MedicalRecords {
   weight: string;
 }
 
+type Prescriptions = Array<{
+  title: string;
+  description: string;
+}>;
+
 const NewConsult: React.FC = () => {
-  const [prescription, setPrescription] = useState([{ test: 0 }]);
-  const [value, setValue] = React.useState(2);
+  const [prescriptions, setPrescriptions] = useState<Prescriptions>([
+    { title: '', description: '' },
+  ]);
   const [tabIndex, setTabIndex] = useState(0);
   const firebaseAuth = firebase.auth().currentUser;
   const firebaseFirestore = firebase.firestore();
 
   const handleRemovePrescription = useCallback(() => {
-    prescription.pop();
-    setPrescription([...prescription]);
-  }, [prescription]);
+    prescriptions.pop();
+    setPrescriptions([...prescriptions]);
+  }, [prescriptions]);
 
   const handleAddNewPrescription = useCallback(() => {
-    setPrescription([...prescription, { test: 1 }]);
-  }, [prescription]);
+    setPrescriptions([...prescriptions, { title: '', description: '' }]);
+  }, [prescriptions]);
 
   const handleMoveToPrescriptionTab = useCallback(
     async (formValues: MedicalRecords) => {
       const time = new Date().getTime();
-      console.log('entrou');
       await firebaseFirestore
         .collection('users')
         .doc(firebaseAuth?.uid)
@@ -89,9 +91,6 @@ const NewConsult: React.FC = () => {
         })
         .then(() => {
           setTabIndex(1);
-        })
-        .catch(err => {
-          console.log(err);
         });
     },
     [firebaseAuth, firebaseFirestore],
@@ -136,16 +135,7 @@ const NewConsult: React.FC = () => {
                 })}
                 onSubmit={() => {}}
               >
-                {({
-                  values,
-                  handleChange,
-                  handleSubmit,
-                  errors,
-                  isSubmitting,
-                  handleBlur,
-                  touched,
-                  setFieldValue,
-                }) => (
+                {({ values, errors, handleBlur, touched, setFieldValue }) => (
                   <Form>
                     <FieldSet>
                       <h1>Prontuário</h1>
@@ -281,17 +271,24 @@ const NewConsult: React.FC = () => {
                       </button>
                     </SecondButton>
 
-                    {prescription.map(() => {
+                    {prescriptions.map((prescription, index) => {
                       return (
-                        <>
+                        <div key={index.toString()}>
                           <Input
-                            type="text"
                             placeholder="Título"
                             width="180px"
+                            onChange={e => {
+                              prescription.title = e.target.value;
+                            }}
                           />
 
-                          <TextArea placeholder="Descrição..." />
-                        </>
+                          <TextArea
+                            placeholder="Descrição..."
+                            onChange={e => {
+                              prescription.description = e.target.value;
+                            }}
+                          />
+                        </div>
                       );
                     })}
 

@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
               icon={FaLaptopMedical}
               title="Nova consulta"
               backgroudnColor="#859DF2"
-              navigate="/"
+              navigate="/new-consult"
             />
 
             <ItenMenu

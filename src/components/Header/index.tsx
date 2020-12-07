@@ -1,26 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { IoIosLogOut } from 'react-icons/io';
-import firebase from 'firebase';
-import 'firebase/firestore';
 
 import { Container, LogoContent, UserAvatar } from './style';
 import logoImg from '../../assets/logo.png';
 
-interface User {
-  name: string | undefined | null;
-  photoUrl: string | undefined | null;
-}
+import { useAuth } from '../../hooks/auth';
 
 const Header: React.FC = () => {
-  const [userInfo, setUserInfo] = useState<User>({} as User);
-
-  useEffect(() => {
-    const user = {
-      name: firebase.auth().currentUser?.displayName,
-      photoUrl: firebase.auth().currentUser?.photoURL,
-    };
-    setUserInfo(user);
-  }, []);
+  const { userStatus, signOut } = useAuth();
 
   return (
     <Container>
@@ -30,15 +17,15 @@ const Header: React.FC = () => {
       </LogoContent>
 
       <UserAvatar>
-        <img src={userInfo.photoUrl ? userInfo.photoUrl : ''} alt="" />
+        <img src={userStatus.photoUrl ? userStatus.photoUrl : ''} alt="" />
 
         <p>
           Olá,
-          {` ${userInfo.name}`}
+          {` ${userStatus.name}`}
         </p>
       </UserAvatar>
 
-      <IoIosLogOut size={35} color="#503d77" />
+      <IoIosLogOut size={35} color="#503d77" onClick={signOut} />
     </Container>
   );
 };

@@ -1,8 +1,6 @@
 import React, { useCallback } from 'react';
 import { FaUserAlt, FaLock } from 'react-icons/fa';
 import { Link, useHistory } from 'react-router-dom';
-import firebase from 'firebase';
-import 'firebase/firestore';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
@@ -12,42 +10,34 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import imgLogo from '../../assets/logo.png';
 
+import { useAuth } from '../../hooks/auth';
+import { useToast } from '../../hooks/toast';
+
 interface UserData {
   email: string;
   password: string;
 }
 
 const SignIn: React.FC = () => {
-  const dbFirestore = firebase.firestore();
   const history = useHistory();
+  const { signIn } = useAuth();
+  const { addToast } = useToast();
 
   const handleLogon = useCallback(
-    (user: UserData) => {
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(user.email, user.password)
-        .then(async logedUser => {
-          if (logedUser.user?.displayName === null) {
-            let userName: any;
-            await dbFirestore
-              .collection('users')
-              .doc(logedUser.user?.uid)
-              .get()
-              .then(result => {
-                if (result.exists) {
-                  userName = result.data();
-                }
-              });
-            await firebase.auth().currentUser?.updateProfile({
-              displayName: userName.name,
-            });
-            history.push('/new-consult');
-          }
-          history.push('/new-consult');
-        })
-        .catch(err => {});
+    async (user: UserData) => {
+      try {
+        await signIn({ email: user.email, password: user.password });
+
+        history.push('/dashboard');
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: 'Erro na autenticação',
+          description: 'Ocorreu um erro ao fazer login, cheque as credenciais.',
+        });
+      }
     },
-    [dbFirestore, history],
+    [addToast, history, signIn],
   );
 
   return (
@@ -67,15 +57,7 @@ const SignIn: React.FC = () => {
           })}
           onSubmit={values => handleLogon(values)}
         >
-          {({
-            values,
-            handleChange,
-            handleSubmit,
-            errors,
-            isSubmitting,
-            handleBlur,
-            touched,
-          }) => (
+          {({ values, handleChange, errors, handleBlur, touched }) => (
             <Form>
               <Input
                 onBlur={handleBlur('email')}
