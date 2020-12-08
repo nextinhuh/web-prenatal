@@ -37,9 +37,13 @@ export const Container = styled(animated.div)<ContainerProps>`
   }
   div {
     flex: 1;
+    strong {
+      font-size: 24px;
+    }
+
     p {
       margin-top: 4px;
-      font-size: 14px;
+      font-size: 18px;
       opacity: 0.8;
       line-height: 20px;
     }

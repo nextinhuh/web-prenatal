@@ -27,9 +27,8 @@ const Toast: React.FC<ToastProps> = ({ message, style }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       removeToast(message.id);
-    }, 3000);
+    }, 4000);
 
-    // se retornar uma função de dentro do useEffet, a mesma será automaticamente executada se o componente deixar de existir
     return () => {
       clearTimeout(timer);
     };

@@ -1,16 +1,30 @@
-import React from 'react';
-import { IoIosLogOut } from 'react-icons/io';
+import React, { useCallback } from 'react';
+import { IoIosLogOut, IoIosArrowBack } from 'react-icons/io';
+import { useHistory } from 'react-router-dom';
 
 import { Container, LogoContent, UserAvatar } from './style';
 import logoImg from '../../assets/logo.png';
 
 import { useAuth } from '../../hooks/auth';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  navBack?: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ navBack = false }) => {
   const { userStatus, signOut } = useAuth();
+  const history = useHistory();
+
+  const handleNavBack = useCallback(() => {
+    history.goBack();
+  }, [history]);
 
   return (
     <Container>
+      {navBack && (
+        <IoIosArrowBack size={35} color="#503d77" onClick={handleNavBack} />
+      )}
+
       <LogoContent>
         <p>Cegonha</p>
         <img src={logoImg} alt="" />

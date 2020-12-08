@@ -23,6 +23,14 @@ export const Content = styled.div`
     margin: 5% 0 10% 0;
   }
 
+  form {
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
   button {
     margin-top: 35px;
   }

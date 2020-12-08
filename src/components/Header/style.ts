@@ -8,6 +8,10 @@ export const Container = styled.div`
   justify-content: center;
   background-color: #e5f2eb;
   padding: 32px 0;
+
+  svg {
+    margin-left: 20px;
+  }
 `;
 
 export const LogoContent = styled.div`
