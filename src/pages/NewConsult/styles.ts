@@ -8,6 +8,7 @@ export const Content = styled.div`
   align-items: center;
   justify-content: center;
   margin-top: 50px;
+  flex-direction: column;
 
   ul {
     font-size: 30px;
@@ -131,4 +132,28 @@ export const ErrorText = styled.p`
 
 export const InputText = styled.input`
   background: papayawhip;
+`;
+
+export const SelectPatient = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  background-color: #e5f2eb;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  width: 600px;
+  align-items: center;
+  justify-content: center;
+
+  p {
+    font-size: 48px;
+    margin-bottom: 20px;
+  }
+`;
+
+export const ListPatient = styled.div`
+  width: 100%;
+  max-width: 450px;
+  margin-bottom: 20px;
+  color: black;
 `;

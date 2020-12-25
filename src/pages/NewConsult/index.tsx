@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import { Formik, Form } from 'formik';
 import { useHistory } from 'react-router-dom';
@@ -7,6 +7,7 @@ import 'react-tabs/style/react-tabs.css';
 import * as Yup from 'yup';
 import firebase from 'firebase';
 import 'firebase/firestore';
+import Select from 'react-select';
 
 import {
   Container,
@@ -16,6 +17,8 @@ import {
   TextArea,
   FieldSet,
   ErrorText,
+  ListPatient,
+  SelectPatient,
 } from './styles';
 
 import Header from '../../components/Header';
@@ -37,16 +40,44 @@ type Prescriptions = Array<{
   description: string;
 }>;
 
+type PatientList = Array<{
+  value: string;
+  label: string;
+}>;
+
 const NewConsult: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescriptions>([
     { title: '', description: '' },
   ]);
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecords>();
   const [tabIndex, setTabIndex] = useState(0);
+  const [loadList, setLoadList] = useState(true);
+  const [selectedPatient, setSelectedPatient] = useState<string>();
+  const [patientList, setPatientList] = useState<PatientList>();
   const firebaseAuth = firebase.auth().currentUser;
   const firebaseFirestore = firebase.firestore();
   const { addToast } = useToast();
   const history = useHistory();
+
+  useEffect(() => {
+    async function loadPatient() {
+      const listUsersName: PatientList = [];
+      await firebaseFirestore
+        .collection('users')
+        .get()
+        .then(result => {
+          result.forEach(user => {
+            listUsersName.push({
+              value: user.id,
+              label: user.data().name,
+            });
+          });
+          setPatientList(listUsersName);
+          setLoadList(false);
+        });
+    }
+    loadPatient();
+  }, [firebaseFirestore]);
 
   const handleRemovePrescription = useCallback(() => {
     prescriptions.pop();
@@ -74,40 +105,64 @@ const NewConsult: React.FC = () => {
   );
 
   const handleConsultSubmit = useCallback(async () => {
-    const time = new Date().getTime();
-    await firebaseFirestore
-      .collection('users')
-      .doc(firebaseAuth?.uid)
-      .collection('consults')
-      .doc(time.toString())
-      .set({
-        medicalRecords,
-        prescriptions,
-      })
-      .then(() => {
-        history.push('/dashboard');
-        addToast({
-          type: 'success',
-          title: 'Consulta cadastrada!',
-          description:
-            'Sua consulta foi cadastrada com sucesso, e já podera ser vista na lista.',
+    if (selectedPatient) {
+      const time = new Date().getTime();
+      await firebaseFirestore
+        .collection('users')
+        .doc(selectedPatient)
+        .collection('consults')
+        .doc(time.toString())
+        .set({
+          medicalRecords,
+          prescriptions,
+        })
+        .then(() => {
+          history.push('/dashboard');
+          addToast({
+            type: 'success',
+            title: 'Consulta cadastrada!',
+            description:
+              'Sua consulta foi cadastrada com sucesso, e já podera ser vista na lista.',
+          });
         });
+    } else {
+      addToast({
+        type: 'error',
+        title: 'Paciente não selecionado',
+        description:
+          'Favor selecionar o paciente para o qual deseja adicionar a consulta!',
       });
+    }
   }, [
     prescriptions,
     medicalRecords,
-    firebaseAuth,
     firebaseFirestore,
     addToast,
     history,
+    selectedPatient,
   ]);
 
   return (
     <Container>
       <Header navBack />
       <Content>
+        <SelectPatient>
+          <p>Selecione o paciente</p>
+
+          <ListPatient>
+            <Select
+              options={patientList}
+              placeholder="Selecione um paciente.."
+              isLoading={loadList}
+              onChange={value => setSelectedPatient(value?.value)}
+            />
+          </ListPatient>
+        </SelectPatient>
+
         <Tabs selectedIndex={tabIndex} onSelect={index => setTabIndex(index)}>
-          <TabList>
+          <TabList
+            style={{ borderTopRightRadius: 30, borderTopLeftRadius: 30 }}
+          >
             <Tab>Prontuário</Tab>
             <Tab>Prescrição</Tab>
           </TabList>
