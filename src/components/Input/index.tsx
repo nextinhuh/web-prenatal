@@ -1,6 +1,5 @@
 import React, { InputHTMLAttributes } from 'react';
 import { IconBaseProps } from 'react-icons';
-import MaskedInput from 'react-text-mask';
 
 import { Container } from './style';
 

@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
               icon={FaFileSignature}
               title="Consultas realizadas"
               backgroudnColor="#F1D99A"
-              navigate="/"
+              navigate="/registered-consults"
             />
 
             <ItenMenu

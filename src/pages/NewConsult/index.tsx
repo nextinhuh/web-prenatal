@@ -45,6 +45,11 @@ type PatientList = Array<{
   label: string;
 }>;
 
+interface SelectedPaciente {
+  value: string;
+  label: string;
+}
+
 const NewConsult: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescriptions>([
     { title: '', description: '' },
@@ -52,9 +57,11 @@ const NewConsult: React.FC = () => {
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecords>();
   const [tabIndex, setTabIndex] = useState(0);
   const [loadList, setLoadList] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState<string>();
+  const [
+    selectedPatient,
+    setSelectedPatient,
+  ] = useState<SelectedPaciente | null>();
   const [patientList, setPatientList] = useState<PatientList>();
-  const firebaseAuth = firebase.auth().currentUser;
   const firebaseFirestore = firebase.firestore();
   const { addToast } = useToast();
   const history = useHistory();
@@ -109,7 +116,7 @@ const NewConsult: React.FC = () => {
       const time = new Date().getTime();
       await firebaseFirestore
         .collection('users')
-        .doc(selectedPatient)
+        .doc(selectedPatient.value)
         .collection('consults')
         .doc(time.toString())
         .set({
@@ -117,6 +124,15 @@ const NewConsult: React.FC = () => {
           prescriptions,
         })
         .then(() => {
+          firebaseFirestore
+            .collection('users')
+            .doc(firebase.auth().currentUser?.uid)
+            .update({
+              registeredConsults: firebase.firestore.FieldValue.arrayUnion({
+                id: time.toString(),
+                name: selectedPatient.label,
+              }),
+            });
           history.push('/dashboard');
           addToast({
             type: 'success',
@@ -154,7 +170,7 @@ const NewConsult: React.FC = () => {
               options={patientList}
               placeholder="Selecione um paciente.."
               isLoading={loadList}
-              onChange={value => setSelectedPatient(value?.value)}
+              onChange={value => setSelectedPatient(value)}
             />
           </ListPatient>
         </SelectPatient>
