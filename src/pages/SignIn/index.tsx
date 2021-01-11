@@ -67,7 +67,9 @@ const SignIn: React.FC = () => {
                 value={values.email}
                 onChange={handleChange('email')}
               />
-              {touched.email && <ErrorText>{errors.email}</ErrorText>}
+              {touched.email && errors.email && (
+                <ErrorText>{errors.email}</ErrorText>
+              )}
 
               <Input
                 onBlur={handleBlur('password')}
@@ -78,7 +80,9 @@ const SignIn: React.FC = () => {
                 onChange={handleChange('password')}
                 type="password"
               />
-              {touched.password && <ErrorText>{errors.password}</ErrorText>}
+              {touched.password && errors.password && (
+                <ErrorText>{errors.password}</ErrorText>
+              )}
 
               <Button type="submit">Entrar</Button>
             </Form>

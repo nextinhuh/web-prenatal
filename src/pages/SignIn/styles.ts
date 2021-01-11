@@ -42,10 +42,9 @@ export const Content = styled.div`
 `;
 
 export const ErrorText = styled.p`
-  font-size: 20px;
-  text-align: right;
+  font-size: 23px !important;
   color: red;
-  margin: 5px 0;
+  margin: 5px 0 !important;
 `;
 
 export const InputText = styled.input`
